@@ -1,2 +1,5 @@
-*.deb
-uconsole-sleep
+result
+
+**/dist
+**/.venv
+**/.direnv

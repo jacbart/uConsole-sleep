@@ -1,0 +1,17 @@
+[project]
+name = "sleep-remap-powerkey"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "jacbart", email = "jacbart@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = []
+
+[project.scripts]
+sleep-remap-powerkey = "sleep_remap_powerkey:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
