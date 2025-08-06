@@ -61,6 +61,35 @@
         # Implement build fixups here.
         # Note that uv2nix is _not_ using Nixpkgs buildPythonPackage.
         # It's using https://pyproject-nix.github.io/pyproject.nix/build.html
+        
+        # Use uv_build for packages that need it
+        inotify-simple = _prev.inotify-simple.overrideAttrs (old: {
+          build-system = [ "uv_build" ];
+          # Add a pyproject.toml if it doesn't exist
+          preConfigure = ''
+            if [ ! -f pyproject.toml ]; then
+              cat > pyproject.toml << 'EOF'
+[build-system]
+requires = ["uv_build"]
+build-backend = "uv_build"
+EOF
+            fi
+          '';
+        });
+        
+        python-uinput = _prev.python-uinput.overrideAttrs (old: {
+          build-system = [ "uv_build" ];
+          # Add a pyproject.toml if it doesn't exist
+          preConfigure = ''
+            if [ ! -f pyproject.toml ]; then
+              cat > pyproject.toml << 'EOF'
+[build-system]
+requires = ["uv_build"]
+build-backend = "uv_build"
+EOF
+            fi
+          '';
+        });
       };
 
       # Support multiple architectures
@@ -100,6 +129,7 @@
       packages = lib.genAttrs supportedSystems (system:
         let
           pythonSet = forAllSystems.${system}.pythonSet;
+          isLinux = builtins.elem system [ "aarch64-linux" "x86_64-linux" ];
         in
         {
           # Default package is the sleep-power-control environment
@@ -107,6 +137,9 @@
           
           # Individual app environments
           sleep-power-control = pythonSet.mkVirtualEnv "sleep-power-control-env" workspace.deps.all;
+        }
+        // lib.optionalAttrs isLinux {
+          # Only build sleep-remap-powerkey on Linux systems
           sleep-remap-powerkey = pythonSet.mkVirtualEnv "sleep-remap-powerkey-env" workspace.deps.all;
         }
       );
