@@ -1,39 +1,46 @@
 import os
-import uinput
-from find_drm_panel import find_drm_panel
-from find_framebuffer import find_framebuffer
-from find_backlight import find_backlight
+
+# Try to import uinput, but don't fail if it's not available (e.g., on macOS)
+try:
+    import uinput
+    UINPUT_AVAILABLE = True
+except ImportError:
+    UINPUT_AVAILABLE = False
+    print("Warning: uinput module not available (this is expected on macOS)")
+
+from .find_drm_panel import find_drm_panel
+from .find_framebuffer import find_framebuffer
+from .find_backlight import find_backlight
 
 
 DISABLE_POWER_OFF_DRM = os.environ.get("DISABLE_POWER_OFF_DRM") == "yes"
 
-drm_panel_path = find_drm_panel()
-framebuffer_path = find_framebuffer()
-backlight_path = find_backlight()
-
-if not drm_panel_path:
-    raise Exception("there's no matched drm panel")
-
-if not framebuffer_path:
-    raise Exception("there's no matched framebuffer")
-
-if not backlight_path:
-    raise Exception("there's no matched backlight")
-
-uinput_path = "/dev/uinput"
-if not os.path.exists(uinput_path):
-    raise FileNotFoundError(f"{uinput_path} 파일이 존재하지 않습니다.")
-
-uinput_device = uinput.Device([uinput.KEY_SLEEP, uinput.KEY_WAKEUP])
-
-status_path = os.path.join(backlight_path, "bl_power")
-
 def toggle_display():
-    global drm_panel_path
-    global framebuffer_path
-    global backlight_path
-    global uinput_device
-    global status_path
+    """Toggle display power state."""
+    if not UINPUT_AVAILABLE:
+        print("Error: uinput module not available. This function requires Linux.")
+        return
+    
+    drm_panel_path = find_drm_panel()
+    framebuffer_path = find_framebuffer()
+    backlight_path = find_backlight()
+
+    if not drm_panel_path:
+        raise Exception("there's no matched drm panel")
+
+    if not framebuffer_path:
+        raise Exception("there's no matched framebuffer")
+
+    if not backlight_path:
+        raise Exception("there's no matched backlight")
+
+    uinput_path = "/dev/uinput"
+    if not os.path.exists(uinput_path):
+        raise FileNotFoundError(f"{uinput_path} 파일이 존재하지 않습니다.")
+
+    uinput_device = uinput.Device([uinput.KEY_SLEEP, uinput.KEY_WAKEUP])
+
+    status_path = os.path.join(backlight_path, "bl_power")
 
     try:
         with open(status_path, "r") as f:

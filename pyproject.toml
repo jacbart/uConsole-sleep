@@ -3,8 +3,11 @@ name = "uconsole-sleep"
 version = "0.1.0"
 description = "uConsole Sleep workspace with power control and power key remapping"
 readme = "README.md"
-requires-python = ">=3.13"
-dependencies = []
+requires-python = ">=3.12"
+dependencies = [
+    "sleep-power-control",
+    "sleep-remap-powerkey",
+]
 
 [tool.uv.workspace]
 members = [
@@ -13,5 +16,5 @@ members = [
 ]
 
 [tool.uv.sources]
-sleep-power-control = { path = "sleep-power-control" }
-sleep-remap-powerkey = { path = "sleep-remap-powerkey" }
+sleep-power-control = { workspace = true }
+sleep-remap-powerkey = { workspace = true }

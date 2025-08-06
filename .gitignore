@@ -3,3 +3,4 @@ result
 **/dist
 **/.venv
 **/.direnv
+**/__pycache__

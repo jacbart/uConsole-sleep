@@ -64,13 +64,13 @@
       };
 
       # Support multiple architectures
-      supportedSystems = [ "aarch64-linux" ];
+      supportedSystems = [ "aarch64-linux" "aarch64-darwin" "x86_64-linux" "x86_64-darwin" ];
 
       # Create package set for each supported system
       forAllSystems = lib.genAttrs supportedSystems (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          python = pkgs.python313;
+          python = pkgs.python312; # Use Python 3.12 for better compatibility
 
           # Construct package set
           pythonSet =
@@ -93,6 +93,9 @@
 
     in
     {
+      # Expose the workspace for debugging
+      workspace = workspace;
+
       # Package virtual environments for each app
       packages = lib.genAttrs supportedSystems (system:
         let
@@ -100,11 +103,11 @@
         in
         {
           # Default package is the sleep-power-control environment
-          default = pythonSet.mkVirtualEnv "sleep-power-control-env" workspace.deps.sleep-power-control;
+          default = pythonSet.mkVirtualEnv "sleep-power-control-env" workspace.deps.all;
           
           # Individual app environments
-          sleep-power-control = pythonSet.mkVirtualEnv "sleep-power-control-env" workspace.deps.sleep-power-control;
-          sleep-remap-powerkey = pythonSet.mkVirtualEnv "sleep-remap-powerkey-env" workspace.deps.sleep-remap-powerkey;
+          sleep-power-control = pythonSet.mkVirtualEnv "sleep-power-control-env" workspace.deps.all;
+          sleep-remap-powerkey = pythonSet.mkVirtualEnv "sleep-remap-powerkey-env" workspace.deps.all;
         }
       );
 
@@ -117,41 +120,43 @@
           # Default app is sleep-power-control
           default = {
             type = "app";
-            program = "${self.packages.${system}.sleep-power-control}/bin/sleep-power-control";
+            program = "${self.packages.${system}."sleep-power-control"}/bin/sleep-power-control";
           };
           
           sleep-power-control = {
             type = "app";
-            program = "${self.packages.${system}.sleep-power-control}/bin/sleep-power-control";
+            program = "${self.packages.${system}."sleep-power-control"}/bin/sleep-power-control";
           };
           
           sleep-remap-powerkey = {
             type = "app";
-            program = "${self.packages.${system}.sleep-remap-powerkey}/bin/sleep-remap-powerkey";
+            program = "${self.packages.${system}."sleep-remap-powerkey"}/bin/sleep-remap-powerkey";
           };
         }
       );
 
-      # NixOS modules for systemd services
-      nixosModules = {
-        default = { config, pkgs, lib, ... }: {
-          imports = [ ./module.nix ];
-          _module.args = {
-            sleep-power-control = self.packages.aarch64-linux.sleep-power-control;
-            sleep-remap-powerkey = self.packages.aarch64-linux.sleep-remap-powerkey;
+      # NixOS modules for systemd services (only for Linux)
+      nixosModules = lib.genAttrs [ "aarch64-linux" "x86_64-linux" ] (system:
+        {
+          default = { config, pkgs, lib, ... }: {
+            imports = [ ./module.nix ];
+            _module.args = {
+              sleep-power-control = self.packages.${system}."sleep-power-control";
+              sleep-remap-powerkey = self.packages.${system}."sleep-remap-powerkey";
+            };
           };
-        };
-        uconsole-sleep = { config, pkgs, lib, ... }: {
-          imports = [ ./module.nix ];
-          _module.args = {
-            sleep-power-control = self.packages.aarch64-linux.sleep-power-control;
-            sleep-remap-powerkey = self.packages.aarch64-linux.sleep-remap-powerkey;
+          uconsole-sleep = { config, pkgs, lib, ... }: {
+            imports = [ ./module.nix ];
+            _module.args = {
+              sleep-power-control = self.packages.${system}."sleep-power-control";
+              sleep-remap-powerkey = self.packages.${system}."sleep-remap-powerkey";
+            };
           };
-        };
-      };
+        }
+      );
 
-      # VM checks for cross-compilation and testing
-      checks = lib.genAttrs supportedSystems (system:
+      # VM checks for cross-compilation and testing (only for Linux)
+      checks = lib.genAttrs [ "aarch64-linux" "x86_64-linux" ] (system:
         let
           pkgs = forAllSystems.${system}.pkgs;
         in
@@ -174,8 +179,8 @@
               
               # Add our packages to the system
               environment.systemPackages = [
-                self.packages.${system}.sleep-power-control
-                self.packages.${system}.sleep-remap-powerkey
+                self.packages.${system}."sleep-power-control"
+                self.packages.${system}."sleep-remap-powerkey"
               ];
               
               # Import our module for testing
