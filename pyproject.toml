@@ -1,10 +1,16 @@
 [project]
 name = "uconsole-sleep"
 version = "0.1.0"
-description = ""
+description = "uConsole Sleep workspace with power control and power key remapping"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = ["inotify-simple>=1.3.5"]
+dependencies = []
+
+[tool.uv.workspace]
+members = [
+    "sleep-power-control",
+    "sleep-remap-powerkey"
+]
 
 [tool.uv.sources]
 sleep-power-control = { path = "sleep-power-control" }

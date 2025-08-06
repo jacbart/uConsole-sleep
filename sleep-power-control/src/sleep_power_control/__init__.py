@@ -126,3 +126,13 @@ while True:
     except Exception as e:
         print(f"Error occurred: {e}")
 
+
+def main():
+    """Main entry point for the sleep-power-control script."""
+    # The existing code already runs when the module is imported
+    # This function serves as the entry point for the script
+    pass
+
+if __name__ == "__main__":
+    main()
+

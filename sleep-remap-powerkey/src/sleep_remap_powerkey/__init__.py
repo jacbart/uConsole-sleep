@@ -57,3 +57,13 @@ with open(EVENT_DEVICE, "rb") as f:
     finally:
         epoll.unregister(f.fileno())
         epoll.close()
+
+
+def main():
+    """Main entry point for the sleep-remap-powerkey script."""
+    # The existing code already runs when the module is imported
+    # This function serves as the entry point for the script
+    pass
+
+if __name__ == "__main__":
+    main()

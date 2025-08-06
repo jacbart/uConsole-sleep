@@ -2,6 +2,13 @@ version = 1
 revision = 2
 requires-python = ">=3.13"
 
+[manifest]
+members = [
+    "sleep-power-control",
+    "sleep-remap-powerkey",
+    "uconsole-sleep",
+]
+
 [[package]]
 name = "inotify-simple"
 version = "1.3.5"
@@ -9,12 +16,34 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/51/41/59ca6011f5463d5e5eefcfed2e7fe470922d3a958b7f3aad95eda208d7d3/inotify_simple-1.3.5.tar.gz", hash = "sha256:8440ffe49c4ae81a8df57c1ae1eb4b6bfa7acb830099bfb3e305b383005cc128", size = 9747, upload-time = "2020-08-06T00:24:00.561Z" }
 
 [[package]]
-name = "uconsole-sleep"
+name = "python-uinput"
+version = "1.0.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/1d/58/f0ac92b19b3a9eda6a1d88d48bd17993d8a749600d981715b9be372ded5d/python-uinput-1.0.1.tar.gz", hash = "sha256:853697344b64df5537d4ae32ba6fbcf0515d51a9010910f5d5019959038b6eba", size = 41415, upload-time = "2024-03-17T18:55:35.7Z" }
+
+[[package]]
+name = "sleep-power-control"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "sleep-power-control" }
 dependencies = [
     { name = "inotify-simple" },
 ]
 
 [package.metadata]
 requires-dist = [{ name = "inotify-simple", specifier = ">=1.3.5" }]
+
+[[package]]
+name = "sleep-remap-powerkey"
+version = "0.1.0"
+source = { editable = "sleep-remap-powerkey" }
+dependencies = [
+    { name = "python-uinput" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "python-uinput", specifier = ">=0.11.2" }]
+
+[[package]]
+name = "uconsole-sleep"
+version = "0.1.0"
+source = { virtual = "." }
